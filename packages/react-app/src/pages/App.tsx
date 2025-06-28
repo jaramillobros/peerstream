@@ -1,7 +1,9 @@
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWeb3React } from '@web3-react/core'
+import { useAppDispatch } from '../hooks/useRedux'
+import { setCurrentUser } from '../store/slices/userSlice'
 import Web3ReactManager from '../components/Web3ReactManager'
 import ErrorBoundary from '../components/common/ErrorBoundary'
 import LoadingSpinner from '../components/common/LoadingSpinner'
@@ -10,6 +12,9 @@ import Footer from '../components/Footer'
 import { Home } from './Home'
 import { Discover } from './Discover'
 import { Meeting } from './Meeting'
+import DashboardPage from './Dashboard'
+import PeerMarketplace from '../components/Marketplace/PeerMarketplace'
+import MultiVisionHome from './MultiVisionHome'
 
 const AppWrapper = styled.div`
   display: flex;
@@ -80,21 +85,32 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 }
 
 export default function App(): JSX.Element {
-  const context = useWeb3React()
+  const { active, account, error } = useWeb3React()
+  const dispatch = useAppDispatch()
+
+  // Update user in Redux when wallet connects
+  useEffect(() => {
+    if (active && account) {
+      dispatch(setCurrentUser({
+        address: account,
+        isVerified: false
+      }))
+    }
+  }, [active, account, dispatch])
 
   // Log connection status for debugging
-  React.useEffect(() => {
-    if (!context.active && !context.error) {
+  useEffect(() => {
+    if (!active && !error) {
       console.log('Web3 loading...')
-    } else if (context.error) {
-      console.error('Web3 connection error:', context.error)
+    } else if (error) {
+      console.error('Web3 connection error:', error)
     } else {
       console.log('Web3 connected successfully:', {
-        account: context.account,
-        chainId: context.chainId
+        account,
+        chainId: (window as any).ethereum?.chainId
       })
     }
-  }, [context])
+  }, [active, error, account])
 
   return (
     <ErrorBoundary>
@@ -110,13 +126,22 @@ export default function App(): JSX.Element {
                 <ErrorBoundary>
                   <Suspense fallback={<SuspenseFallback />}>
                     <Routes>
-                      <Route path="/" element={<Home />} />
+                      <Route path="/" element={<MultiVisionHome />} />
                       <Route path="/home" element={<Home />} />
+                      <Route path="/marketplace" element={<PeerMarketplace />} />
                       <Route 
                         path="/discover" 
                         element={
                           <ProtectedRoute>
                             <Discover />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/dashboard" 
+                        element={
+                          <ProtectedRoute>
+                            <DashboardPage />
                           </ProtectedRoute>
                         } 
                       />
