@@ -1,19 +1,22 @@
 {
   "name": "@sablier-app/monorepo",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "keywords": [
     "ethereum",
     "react",
     "sablier",
-    "workspaces",
-    "yarn"
+    "peer-to-peer",
+    "payment-streaming",
+    "web3"
   ],
   "private": true,
   "scripts": {
     "react-app:build": "yarn workspace @sablier-app/react-app build",
     "react-app:eject": "yarn workspace @sablier-app/react-app eject",
     "react-app:start": "yarn workspace @sablier-app/react-app start",
-    "react-app:test": "yarn workspace @sablier-app/react-app test"
+    "react-app:test": "yarn workspace @sablier-app/react-app test",
+    "react-app:lint": "yarn workspace @sablier-app/react-app lint",
+    "react-app:type-check": "yarn workspace @sablier-app/react-app type-check"
   },
   "workspaces": {
     "packages": [
